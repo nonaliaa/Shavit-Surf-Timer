@@ -68,7 +68,8 @@
 	}
 	"ZoneHook_Asboxform"
 	{
-		"en"        "Hook trigger as Box form"
+		"#format"   "{1:s}"
+		"en"        "[{1}] Hook trigger as Box form"
 	}
 	"ZoneHook_Confirm"
 	{
@@ -311,11 +312,13 @@
 	}
 	"ZoneForceRender"
 	{
-		"en"		"Force zone drawing"
+		"#format"	"{1:s}"
+		"en"		"[{1}] Force zone drawing"
 	}
 	"ZoneDrawAsBox"
 	{
-		"en"		"Draw zone as box"
+		"#format"	"{1:s}"
+		"en"		"[{1}] Draw zone as box"
 	}
 	"ZoneSetAiraccelerate"
 	{
@@ -339,7 +342,8 @@
 	}
 	"ZoneUseStageSpeedLimit"
 	{
-		"en"		"Use prespeed limit"
+		"#format"	"{1:s}"
+		"en"		"[{1}] Use prespeed limit"
 	}
 	"ZoneSetCheckpoint"
 	{
@@ -370,7 +374,7 @@
 	}
 	"ZoneSetTP"
 	{
-		"en"		"Confirm (choose teleport destination first)"
+		"en"		"Comfirm (choose teleport destination first)"
 	}
 	"ZoneSetTPZone"
 	{
@@ -380,9 +384,9 @@
 	{
 		"en"		"Yes"
 	}
-	"ZoneSetConfirm"
+	"ZoneSetComfirm"
 	{
-		"en"		"Confirm"
+		"en"		"Comfirm"
 	}
 	"ZoneSetCancel"
 	{

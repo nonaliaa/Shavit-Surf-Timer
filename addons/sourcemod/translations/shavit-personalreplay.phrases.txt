@@ -42,15 +42,18 @@
 	}
 	"EnableFeature"
 	{
-		"en"		"Enabled feature"
+		"#format"	"{1:s}"
+		"en"		"[{1}] Enabled feature"
 	}
 	"AutoOverwrite"
 	{
-		"en"		"Auto overwrite earliest replay "
+		"#format"	"{1:s}"
+		"en"		"[{1}] Auto overwrite earliest replay "
 	}
 	"PrintSavedMessage"
 	{
-		"en"		"Print message when replay saved "
+		"#format"	"{1:s}"
+		"en"		"[{1}] Print message when replay saved "
 	}
 	// ============== Message translation ====================
 	"PersonalReplayCached"

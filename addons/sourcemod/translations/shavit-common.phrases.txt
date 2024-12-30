@@ -77,12 +77,4 @@
 	{
 		"en"        "Open Steam profile"
 	}
-	"ItemEnabled"
-	{
-		"en"		"＋"
-	}
-	"ItemDisabled"
-	{
-		"en"		"－"
-	}
 }

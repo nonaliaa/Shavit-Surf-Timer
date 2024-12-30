@@ -47,8 +47,6 @@
 #define MSG_ADVERTISEMENT 	   (1 << 8) // show advertisement message
 #define MSG_WORLDRECORD 	   (1 << 9) // show message when player set a new record
 
-#define MSG_DEFAULT (MSG_CHECKPOINT|MSG_EXTRAFINISHINFO)
-
 
 #include <shavit/bhopstats-timerified>
 

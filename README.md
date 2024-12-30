@@ -1,7 +1,7 @@
 # Shavit Surf timer (CS:S ONLY) 
 
-#### 　[ Version 1.0.4 Bugfix ](https://github.com/bhopppp/Shavit-Surf-Timer/releases/tag/v1.0.4-Bugfix)
-#### 　[( click to download )](https://github.com/bhopppp/Shavit-Surf-Timer/releases/download/v1.0.4-Bugfix/Shavit-SurfTimer-v1.0.4-Bugfix.zip)
+#### 　[Version 1.0.4](https://github.com/bhopppp/Shavit-Surf-Timer/releases/download/v1.0.4/Shavit-SurfTimer-v1.0.4.zip)
+[(click to download)](https://github.com/bhopppp/Shavit-Surf-Timer/releases/download/v1.0.4/Shavit-SurfTimer-v1.0.4.zip)
 
 ## About this surf timer
 - This timer is based on [Shavit BhopTimer](https://github.com/shavitush/bhoptimer).

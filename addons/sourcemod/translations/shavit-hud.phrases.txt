@@ -115,10 +115,6 @@
 	{
 		"en"		"Time left"
 	}
-	"HudMapInfo"
-	{
-		"en"		"Map"
-	}
 	"HudPracticeMode"
 	{
 		"en"		"[Practice Mode]"
@@ -172,10 +168,6 @@
 	"HudSpeedText"
 	{
 		"en"		"Speed"
-	}
-	"HudMapInfoText"
-	{
-		"en"		"Map info"
 	}
 	"HudTimeLeftText"
 	{
@@ -231,7 +223,7 @@
 	}
 	"HudRampSpeed"
 	{
-		"en"		"Show speed when board / leave a ramp"
+		"en"		"Show speed when borad / leave a ramp"
 	}
 	"HudTimeDifference"
 	{

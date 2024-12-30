@@ -1404,7 +1404,7 @@ public void ShowMapsCallback(Database db, DBResultSet results, const char[] erro
 			}
 			else
 			{
-				FormatEx(sTrack, sizeof(sTrack), "%T %d", "StageText", client, track);
+				FormatEx(sTrack, sizeof(sTrack), "Stage %d", track);
 			}
 
 			char sTime[32];
@@ -1448,23 +1448,15 @@ public void ShowMapsCallback(Database db, DBResultSet results, const char[] erro
 		menu.AddItem(sRecordID, sDisplay);
 	}
 
-	char sTrack[32];
-	if(gI_Track[client] < 2)
-	{
-		GetTrackName(client, gI_Track[client], sTrack, sizeof(sTrack), false);
-	}
-	else
-	{
-		FormatEx(sTrack, sizeof(sTrack), "%T", "StageText", client);
-	}
-
 	if(gI_MapType[client] == MAPSDONE)
 	{
-		menu.SetTitle("%T", "MapsDoneFor", client, gS_StyleStrings[gI_Style[client]].sShortName, sTrack, gS_TargetName[client], rows);
+		menu.SetTitle("%T", "MapsDoneFor", client, gS_StyleStrings[gI_Style[client]].sShortName, 
+		gI_Track[client] == 0 ? "Map" : gI_Track[client] == 1 ? "Bonus" : "Stage", gS_TargetName[client], rows);
 	}
 	else if(gI_MapType[client] == MAPSRECORD)
 	{
-		menu.SetTitle("%T", "RecordsFor", client, gS_StyleStrings[gI_Style[client]].sShortName, sTrack, gS_TargetName[client], rows);
+		menu.SetTitle("%T", "RecordsFor", client, gS_StyleStrings[gI_Style[client]].sShortName, 
+		gI_Track[client] == 0 ? "Map" : gI_Track[client] == 1 ? "Bonus" : "Stage", gS_TargetName[client], rows);
 	}
 	else
 	{

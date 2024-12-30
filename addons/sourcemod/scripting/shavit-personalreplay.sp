@@ -287,13 +287,13 @@ public void ShowOptionMenu(int client)
     
     char sMenu[64];
 
-    FormatEx(sMenu, sizeof(sMenu), "[%T] %T\n ", gB_Enabled[client] ? "ItemEnabled":"ItemDisabled", client, "EnableFeature", client);
+    FormatEx(sMenu, sizeof(sMenu), "%T\n ", "EnableFeature", client,  gB_Enabled[client] ? "＋":"－");
     menu.AddItem("enable", sMenu);    
 
-    FormatEx(sMenu, sizeof(sMenu), "[%T] %T", gB_AutoOverWrite[client] ? "ItemEnabled":"ItemDisabled", client, "AutoOverwrite", client);
+    FormatEx(sMenu, sizeof(sMenu), "%T", "AutoOverwrite", client, gB_AutoOverWrite[client] ? "＋":"－");
     menu.AddItem("overwrite", sMenu);
 
-    FormatEx(sMenu, sizeof(sMenu), "[%T] %T", gB_PrintSavedMessage[client] ? "ItemEnabled":"ItemDisabled", client, "PrintSavedMessage", client);
+    FormatEx(sMenu, sizeof(sMenu), "%T", "PrintSavedMessage", client, gB_PrintSavedMessage[client] ? "＋":"－");
     menu.AddItem("print", sMenu);
 
     menu.Display(client, MENU_TIME_FOREVER);

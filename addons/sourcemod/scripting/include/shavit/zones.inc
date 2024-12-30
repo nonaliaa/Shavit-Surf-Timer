@@ -25,7 +25,7 @@
 #define _shavit_zones_included
 
 #define MAX_ZONES 128
-#define MAX_STAGES 64
+#define MAX_STAGES 70
 
 enum
 {

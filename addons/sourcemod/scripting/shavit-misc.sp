@@ -1063,20 +1063,15 @@ void FillAdvertisementBuffer(char[] buf, int buflen, int index)
 	}
 	
 	int iStageCount = Shavit_GetStageCount(Track_Main);
-	char sType[16];	
 	char sStageInfo[16];
 
 	if(iStageCount > 1)
 	{
-		FormatEx(sType, 16, "Staged");
 		FormatEx(sStageInfo, 16, "%d Stages", iStageCount);
 	}
 	else
 	{
-		iStageCount = Shavit_GetCheckpointCount(Track_Main);
-
-		FormatEx(sType, 16, "Linear");
-		FormatEx(sStageInfo, 16, "%d Checkpoint%s", iStageCount, iStageCount > 2 ? "s":"");
+		FormatEx(sStageInfo, 16, "Linear");
 	}
 
 	int iBonusCount = Shavit_GetMapTracks(true, false);
@@ -1095,7 +1090,6 @@ void FillAdvertisementBuffer(char[] buf, int buflen, int index)
 	ReplaceString(buf, buflen, "{hostname}", sHostname);
 	ReplaceString(buf, buflen, "{serverip}", sIPAddress);
 	ReplaceString(buf, buflen, "{map}", gS_Map);
-	ReplaceString(buf, buflen, "{type}", sStageInfo);
 	ReplaceString(buf, buflen, "{stage}", sStageInfo);
 	ReplaceString(buf, buflen, "{bonus}", sTrackInfo);
 	ReplaceString(buf, buflen, "{tier}", sTier);

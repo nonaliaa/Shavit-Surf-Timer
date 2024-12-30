@@ -351,9 +351,9 @@ Action ShowSpeedometerMenu(int client, int item = 0)
 	menu.AddItem("colorSetting", "Color Settings\n ");
 	char sMenu[64];
 	float frequancy = 1 / (float(gI_SpeedometerHud_RefreshPreTick[client]) * GetTickInterval());
-	FormatEx(sMenu, 64, "++Frequency\nUpdate Frequency: %.1f Hz", frequancy);
+	FormatEx(sMenu, 64, "++Frequancy\nUpdate Frequancy: %.1f Hz", frequancy);
 	menu.AddItem("plusRefreshPreTick", sMenu);
-	menu.AddItem("minusRefreshPreTick", "--Frequency");
+	menu.AddItem("minusRefreshPreTick", "--Frequancy");
 	menu.ExitButton = true;
 	menu.DisplayAt(client, item, MENU_TIME_FOREVER);
 

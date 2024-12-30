@@ -70,18 +70,6 @@
 	{
 		"en"		"Select a stage to play:"
 	}
-	"Main_Replay"
-	{
-		"en"		"Map Replay"
-	}
-	"Stage_Replay"
-	{
-		"en"		"Stage Replay"
-	}
-	"Bonus_Replay"
-	{
-		"en"		"Bonus Replay"
-	}
 	"Replay_Central"
 	{
 		"en"		"!replay"

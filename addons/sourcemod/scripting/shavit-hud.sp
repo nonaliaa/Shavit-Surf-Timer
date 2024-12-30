@@ -116,8 +116,6 @@ bool gB_Late = false;
 char gS_HintPadding[MAX_HINT_SIZE];
 bool gB_AlternateCenterKeys[MAXPLAYERS+1]; // use for css linux gamers
 
-char gS_Map[PLATFORM_MAX_PATH];
-
 // hud handle
 Handle gH_HUDTopleft = null;
 Handle gH_HUDCenter = null;
@@ -452,11 +450,6 @@ public void OnClientPutInServer(int client)
 			CreateTimer(5.0, Timer_QueryWindowsCvar, GetClientSerial(client), TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
-}
-
-public void OnMapStart()
-{
-	GetLowercaseMapName(gS_Map);
 }
 
 public Action Timer_QueryWindowsCvar(Handle timer, any data)
@@ -804,14 +797,12 @@ Action ShowHUDMenu(int client, int item)
 	FormatEx(sHudItem, 64, "%T", "HudSpectatorsDead", client);
 	menu.AddItem(sInfo, sHudItem);
 
-
-	FormatEx(sInfo, 16, "!%d", HUD_MAPINFO);
-	FormatEx(sHudItem, 64, "%T", "HudMapInfoText", client);
-	menu.AddItem(sInfo, sHudItem);
-
-	FormatEx(sInfo, 16, "!%d", HUD_TIMELEFT);
-	FormatEx(sHudItem, 64, "%T", "HudTimeLeftText", client);
-	menu.AddItem(sInfo, sHudItem);
+	if(IsSource2013(gEV_Type))
+	{
+		FormatEx(sInfo, 16, "!%d", HUD_TIMELEFT);
+		FormatEx(sHudItem, 64, "%T", "HudTimeLeftText", client);
+		menu.AddItem(sInfo, sHudItem);
+	}
 
 	FormatEx(sInfo, 16, "@%d", HUD2_STYLE);
 	FormatEx(sHudItem, 64, "%T", "HudStyleText", client);
@@ -955,11 +946,11 @@ public int MenuHandler_HUD(Menu menu, MenuAction action, int param1, int param2)
 
 		if(type == 1)
 		{
-			Format(sDisplay, 64, "[%T] %s", ((gI_HUDSettings[param1] & iSelection) > 0)? "ItemEnabled":"ItemDisabled", param1, sDisplay);
+			Format(sDisplay, 64, "[%s] %s", ((gI_HUDSettings[param1] & iSelection) > 0)? "＋":"－", sDisplay);
 		}
 		else if (type == 2)
 		{
-			Format(sDisplay, 64, "[%T] %s", ((gI_HUD2Settings[param1] & iSelection) == 0)? "ItemEnabled":"ItemDisabled", param1, sDisplay);
+			Format(sDisplay, 64, "[%s] %s", ((gI_HUD2Settings[param1] & iSelection) == 0)? "＋":"－", sDisplay);
 		}
 		else if (type == 3) // special trinary ones :)
 		{
@@ -2422,20 +2413,9 @@ void UpdateKeyHint(int client, bool force = false)
 
 	if((gI_HUDSettings[client] & HUD_OBSERVE) > 0)
 	{
-		if((gI_HUDSettings[client] & HUD_MAPINFO) > 0)
-		{
-			FormatEx(sMessage, 256, "%T: %s", "HudMapInfo", client, gS_Map);
-
-			if(gB_Rankings)
-			{
-				int tier = Shavit_GetMapTier();
-				FormatEx(sMessage, 256, "%s [T%d]", sMessage, tier);
-			}
-		}
-
 		if((gI_HUDSettings[client] & HUD_TIMELEFT) > 0 && GetMapTimeLeft(iTimeLeft) && iTimeLeft > 0)
 		{
-			FormatEx(sMessage, 256, (iTimeLeft > 60)? "%s%s%T: %d minutes":"%s%s%T: %d seconds", sMessage, (strlen(sMessage) > 0)? "\n":"", "HudTimeLeft", client, (iTimeLeft > 60) ? (iTimeLeft / 60)+1 : iTimeLeft);
+			FormatEx(sMessage, 256, (iTimeLeft > 60)? "%T: %d minutes":"%T: %d seconds", "HudTimeLeft", client, (iTimeLeft > 60) ? (iTimeLeft / 60)+1 : iTimeLeft);
 		}
 
 		if ((0 <= style < gI_Styles) && (0 <= track <= TRACKS_SIZE))
@@ -2584,7 +2564,7 @@ void UpdateKeyHint(int client, bool force = false)
 						char sStageWR[16];
 						FormatSeconds(fStageWR, sStageWR, sizeof(sStageWR));
 
-						Format(sMessage, sizeof(sMessage), "%s\n%T: %s (%s)", sMessage, "HudRecord", client, sStageWR, sStageWRName);
+						Format(sMessage, sizeof(sMessage), "%s\n%T: %s (%s)", sMessage, "HudRecrod", client, sStageWR, sStageWRName);
 					}					
 				}
 

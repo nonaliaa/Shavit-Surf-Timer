@@ -142,11 +142,10 @@ native int Shavit_GetWRHolderRank(int client, int track = -1, int style = -1, bo
  * @param style                     The style the time is from.
  * @param rank						The rank of the time.
  * @param tier                      The map tier. -1 to use the current map's tier.
- * @param count						Record counts of where the time is from.
  *
  * @return                          The number of points the time would give.
  */
-native float Shavit_GuessPointsForTime(int track, int stage, int style, int rank, int tier, int count);
+native float Shavit_GuessPointsForTime(int track, int stage, int style, int rank, int tier);
 
 public SharedPlugin __pl_shavit_rankings =
 {

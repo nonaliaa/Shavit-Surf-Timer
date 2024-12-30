@@ -157,8 +157,6 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_ccmessage", Command_CCMessage, "Toggles/sets a custom chat message color. Usage: sm_ccmessage <color> or sm_ccmessage \"off\" to disable.");
 	RegConsoleCmd("sm_chatrank", Command_ChatRanks, "View a menu of the chat ranks.");
 	RegConsoleCmd("sm_chatranks", Command_ChatRanks, "View a menu of the chat ranks.");
-	RegConsoleCmd("sm_crank", Command_ChatRanks, "View a menu of the chat ranks.");
-	RegConsoleCmd("sm_cranks", Command_ChatRanks, "View a menu of the chat ranks.");
 	RegConsoleCmd("sm_ranks", Command_ChatRanks, "View a menu of the chat ranks.");
 
 	RegAdminCmd("sm_cclist", Command_CCList, ADMFLAG_CHAT, "Print the custom chat setting of all online players.");
@@ -886,14 +884,8 @@ Action ShowChatRanksMenu(int client, int item)
 			continue;
 		}
 
-		char sEquipped[16];
-		if(gI_ChatSelection[client] == i)
-		{
-			FormatEx(sEquipped, sizeof(sEquipped), "[%T] ", "TitleEquipped", client);			
-		}
-
 		char sMenuDisplay[MAXLENGTH_DISPLAY];
-		FormatEx(sMenuDisplay, sizeof(sMenuDisplay), "%s%s\n ", sEquipped, cache.sDisplay);
+		FormatEx(sMenuDisplay, sizeof(sMenuDisplay), "%s\n ", cache.sDisplay);
 
 		char sInfo[8];
 		IntToString(i, sInfo, 8);
@@ -1042,7 +1034,7 @@ bool HasRankAccess(int client, int rank)
 
 		if(FindFlagByChar(sFlag[0], afFlag))
 		{
-			bFlagAccess = GetAdminFlag(GetUserAdmin(client), afFlag);			
+			bFlagAccess = GetAdminFlag(GetUserAdmin(client), afFlag);
 		}
 	}
 	else
@@ -1062,7 +1054,7 @@ bool HasRankAccess(int client, int rank)
 
 	if(/*!gB_Rankings ||*/ !gCV_RankingsIntegration.BoolValue)
 	{
-		return bFlagAccess;
+		return false;
 	}
 
 	if ((!gB_Rankings && (cache.iRequire == Require_Rank || cache.iRequire == Require_Points))

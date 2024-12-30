@@ -35,7 +35,7 @@
 #pragma newdecls required
 
 
-static char gS_ZoneTypes[ZONETYPES_SIZE][18] = {
+static char gS_ZoneTypes[][18] = {
 	"start",
 	"end",
 	"stage",	
@@ -52,7 +52,7 @@ static char gS_ZoneTypes[ZONETYPES_SIZE][18] = {
 	"airaccel",
 	"notimergravity",
 	"gravity",
-	"speedmod",
+	"speedmod"
 };
 
 static char gS_ZoneForms[5][26] = {

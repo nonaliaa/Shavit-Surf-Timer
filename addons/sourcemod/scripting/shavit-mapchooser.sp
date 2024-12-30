@@ -106,10 +106,6 @@ ArrayList g_aOldMaps;
 /* Map Data */
 char g_cMapName[PLATFORM_MAX_PATH];
 
-/* New map datas */
-ArrayList gA_NewestMaps;
-ConVar gCV_MaxMapsToShow;
-
 MapChange g_ChangeTime;
 
 bool g_bWaitingForChange;
@@ -150,12 +146,6 @@ bool gB_Late = false;
 EngineVersion gEV_Type = Engine_Unknown;
 
 bool gB_Rankings = false;
-
-enum struct MapInfo 
-{
-	int TimeStamp;
-	char MapName[PLATFORM_MAX_PATH];
-}
 
 enum
 {
@@ -202,7 +192,6 @@ public void OnPluginStart()
 
 	gEV_Type = GetEngineVersion();
 
-	gA_NewestMaps = new ArrayList(sizeof(MapInfo));
 	g_aMapList = new ArrayList(ByteCountToCells(PLATFORM_MAX_PATH));
 	g_aAllMapsList = new ArrayList(ByteCountToCells(PLATFORM_MAX_PATH));
 	g_aNominateList = new ArrayList(ByteCountToCells(PLATFORM_MAX_PATH));
@@ -249,8 +238,6 @@ public void OnPluginStart()
 
 	g_cvAntiSpam = new Convar("smc_anti_spam", "15.0", "The number of seconds a player needs to wait before rtv/unrtv/nominate/unnominate.", 0, true, 0.0, true, 300.0);
 
-	gCV_MaxMapsToShow = new Convar("smc_maxmapstoshow", "25", "Number of maps to display", 0, true, 1.0, true, 100.0);
-
 	g_cvPrefix = new Convar("smc_prefix", "[SM] ", "The prefix SMC messages have");
 	g_cvPrefix.AddChangeHook(OnConVarChanged);
 
@@ -272,8 +259,6 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_nomlist", Command_NomList, "Shows currently nominated maps");
 	RegConsoleCmd("sm_nominatedmaps", Command_NomList, "Shows currently nominated maps");
 	RegConsoleCmd("sm_nominations", Command_NomList, "Shows currently nominated maps");
-
-	RegConsoleCmd("sm_newmaps", Command_Newmaps, "List recently uploaded maps.");
 
 	RegAdminCmd("sm_smcdebug", Command_Debug, ADMFLAG_RCON);
 
@@ -653,110 +638,6 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 
 		SetCmdReplySource(old);
 	}
-}
-
-public Action Command_Newmaps(int client, int args)
-{
-	if(!IsValidClient(client))
-	{
-		return Plugin_Continue;
-	}
-
-	UpdateMapsList();
-	NewMapsMenu(client, false);
-	return Plugin_Handled;
-}
-
-void NewMapsMenu(int client, bool back)
-{
-	Menu menu = new Menu(Handler_NewestMaps);
-	
-	menu.ExitBackButton = back;		
-	
-	int mapsToShow = (gCV_MaxMapsToShow.IntValue < gA_NewestMaps.Length) ? gCV_MaxMapsToShow.IntValue : gA_NewestMaps.Length;
-	menu.SetTitle("%i of Newest Maps :", mapsToShow);
-
-	for (int i = 0; i < mapsToShow; i++)
-	{
-		MapInfo map;
-		gA_NewestMaps.GetArray(i, map);
-
-		char time[32], display[255];
-		FormatTime(time, sizeof(time), "%Y/%m/%d %H:%M", map.TimeStamp);
-		Format(display, sizeof(display), "%s | [T%i]  %s", time, Shavit_GetMapTier(map.MapName), map.MapName);
-
-		menu.AddItem(map.MapName, display);
-	}
-
-	menu.Display(client, MENU_TIME_FOREVER);
-}
-
-public int Handler_NewestMaps(Menu menu, MenuAction action, int client, int choice)
-{
-	if (action == MenuAction_Select)
-	{
-		char mapName[PLATFORM_MAX_PATH];
-		menu.GetItem(choice, mapName, sizeof(mapName));
-		FakeClientCommand(client, "sm_nominate %s", mapName);
-		NewMapsMenu(client, true);
-	}
-	else if(action == MenuAction_Cancel && choice == MenuCancel_ExitBack)
-	{
-		Command_Nominate(client, 0);
-	}
-	else if (action == MenuAction_End)
-	{
-		delete menu;
-	}
-
-	return 0;
-}
-
-void UpdateMapsList()
-{
-	gA_NewestMaps.Clear();
-	DirectoryListing dir = OpenDirectory("maps", true);
-
-	if (dir == null)
-	{
-		return;
-	}
-
-	char fileName[PLATFORM_MAX_PATH];
-	FileType type;
-
-	while (dir.GetNext(fileName, sizeof(fileName), type))
-	{
-		if (type != FileType_File)
-		{
-			continue;
-		}
-
-		int length = strlen(fileName);
-
-		if (length < 5 || fileName[length-4] != '.') // a.bsp
-		{
-			continue;
-		}
-
-		if (!(fileName[length-3] == 'b' && fileName[length-2] == 's' && fileName[length-1] == 'p'))
-		{
-			continue;
-		}
-
-		char path[PLATFORM_MAX_PATH];
-		FormatEx(path, sizeof(path), "maps/%s", fileName);
-		
-		MapInfo map;
-		map.TimeStamp = GetFileTime(path, FileTime_LastChange);
-		strcopy(map.MapName, sizeof(map.MapName), fileName);
-		ReplaceString(map.MapName, sizeof(map.MapName), ".bsp", "", false);
-
-		gA_NewestMaps.PushArray(map);
-	}
-
-	CloseHandle(dir);
-	gA_NewestMaps.Sort(Sort_Descending, Sort_Integer);
 }
 
 void InitiateMapVote(MapChange when)
@@ -1758,8 +1639,6 @@ void CreateEnhancedMenu()
 	g_hEnhancedMenu.SetTitle("Nominate");
 	g_hEnhancedMenu.AddItem("Alphabetic", "Alphabetic");
 
-	g_hEnhancedMenu.AddItem("Newmaps", "New maps");
-
 	for(int i = GetConVarInt(g_cvMinTier); i <= GetConVarInt(g_cvMaxTier); ++i)
 	{
 		int count = GetMenuItemCount(g_aTierMenus[i]);
@@ -1924,11 +1803,6 @@ public int EnhancedMenuHandler(Menu menu, MenuAction action, int client, int par
 		if (StrEqual(option , "Alphabetic"))
 		{
 			OpenNominateMenu(client);
-		}
-		else if(StrEqual(option, "Newmaps"))
-		{
-			UpdateMapsList();
-			NewMapsMenu(client, true);
 		}
 		else
 		{

@@ -100,7 +100,6 @@ bool gB_Auto[MAXPLAYERS+1];
 int gI_FirstTouchedGround[MAXPLAYERS+1];
 int gI_LastTickcount[MAXPLAYERS+1];
 int gI_LastNoclipTick[MAXPLAYERS+1];
-int gI_LastButtons[MAXPLAYERS+1];
 
 // these are here until the compiler bug is fixed
 float gF_PauseOrigin[MAXPLAYERS+1][3];
@@ -851,7 +850,6 @@ public void ShowTrackMenu(int client, bool bonus)
 	Menu menu = new Menu(MenuHandler_Track);
 	menu.SetTitle("%T\n ", bonus ? "MenuSelectBonus":"MenuSelectTrack", client);
 
-	int iLastTrack;
 	char sTrack[32];
 	for(int i = bonus ? 1:0; i < TRACKS_SIZE; i++)
 	{
@@ -868,22 +866,11 @@ public void ShowTrackMenu(int client, bool bonus)
 			IntToString(i, sInfo, 8);
 
 			menu.AddItem(sInfo, sTrack, ITEMDRAW_DEFAULT);
-
-			iLastTrack = i;
 		}
 	}
 
-	if(bonus && menu.ItemCount == 1)
-	{
-		Shavit_RestartTimer(client, iLastTrack, true, false);
-		delete menu;
-		return;
-	}	
-
 	if(menu.ItemCount == 0)
 	{
-		Shavit_PrintToChat(client, "%T", bonus ? "MapNoBonus":"UnZonedMap", client);
-
 		delete menu;
 		return;
 	}
@@ -900,7 +887,7 @@ public int MenuHandler_Track(Menu menu, MenuAction action, int param1, int param
 
 		int track = StringToInt(sInfo);
 
-		Shavit_RestartTimer(param1, track, true, false);
+		Shavit_RestartTimer(param1, track, true, true);
 	}
 	else if (action == MenuAction_End)
 	{
@@ -3363,7 +3350,7 @@ public void OnClientCookiesCached(int client)
 
 	if(strlen(sMsgSettings) == 0)
 	{
-		IntToString(MSG_DEFAULT, sMsgSettings, sizeof(sMsgSettings));
+		IntToString(MSG_NONE, sMsgSettings, sizeof(sMsgSettings));
 		SetClientCookie(client, gH_MessageCookie, sMsgSettings);
 	}
 
@@ -4004,9 +3991,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		return Plugin_Changed;
 	}
 
-	int iLastButtons = gI_LastButtons[client]; // buttons without effected by code.
-	gI_LastButtons[client] = buttons;
-
 	Action result = Plugin_Continue;
 	Call_StartForward(gH_Forwards_OnUserCmdPre);
 	Call_PushCell(client);
@@ -4251,43 +4235,24 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		SetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", fSpeed);
 	}
 
-	// perf jump measuring
-	bool bOnGround = (!bInWater && mtMoveType == MOVETYPE_WALK && iGroundEntity != -1);
-
-	gI_LastTickcount[client] = tickcount;
-
-
-	int blockprejump = GetStyleSettingInt(gA_Timers[client].bsStyle, "blockprejump");
-
-	if (blockprejump < 0)
+	if ((buttons & IN_JUMP) > 0 && mtMoveType == MOVETYPE_WALK && !bInWater)
 	{
-		blockprejump = gCV_BlockPreJump.BoolValue;
-	}
-
-	if ((bInStart && blockprejump && GetStyleSettingInt(gA_Timers[client].bsStyle, "prespeed") == 0 && (vel[2] > 0 || (buttons & IN_JUMP) > 0)) 
-	|| (gB_Zones && Shavit_InsideZone(client, Zone_NoJump, gA_Timers[client].iTimerTrack)))
-	{
-		if((iLastButtons & IN_JUMP) == 0 && (buttons & IN_JUMP) > 0 && bOnGround)
-		{
-			Shavit_PrintToChat(client, "%T", "NotAllowJump", client);
-		}
-
-		vel[2] = 0.0;
-		buttons &= ~IN_JUMP;
-	}
-	else if ((buttons & IN_JUMP) > 0 && mtMoveType == MOVETYPE_WALK && !bInWater)
-	{
-		if ((gB_Auto[client] && GetStyleSettingBool(gA_Timers[client].bsStyle, "autobhop")) 
+		if ( (gB_Auto[client] && GetStyleSettingBool(gA_Timers[client].bsStyle, "autobhop")) 
 		|| (gB_Zones && Shavit_InsideZone(client, Zone_Autobhop, gA_Timers[client].iTimerTrack)))
 		{	// just force autobhop enabled in autobhop zone whatever situation
 			SetEntProp(client, Prop_Data, "m_nOldButtons", (iOldButtons &= ~IN_JUMP));			
 		}
 	}
 
+	// perf jump measuring
+	bool bOnGround = (!bInWater && mtMoveType == MOVETYPE_WALK && iGroundEntity != -1);
+
 	if(mtMoveType == MOVETYPE_NOCLIP)
 	{
 		gI_LastNoclipTick[client] = tickcount;
 	}
+
+	gI_LastTickcount[client] = tickcount;
 
 	if(bOnGround && !gA_Timers[client].bOnGround)
 	{
@@ -4312,6 +4277,25 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 				gA_Timers[client].iPerfectJumps++;
 			}
 		}
+	}
+
+	int blockprejump = GetStyleSettingInt(gA_Timers[client].bsStyle, "blockprejump");
+
+	if (blockprejump < 0)
+	{
+		blockprejump = gCV_BlockPreJump.BoolValue;
+	}
+
+	if (bInStart && blockprejump && GetStyleSettingInt(gA_Timers[client].bsStyle, "prespeed") == 0 && (vel[2] > 0 || (buttons & IN_JUMP) > 0))
+	{
+		vel[2] = 0.0;
+		buttons &= ~IN_JUMP;
+	}
+
+	if (gB_Zones && Shavit_InsideZone(client, Zone_NoJump, gA_Timers[client].iTimerTrack))
+	{
+		vel[2] = 0.0;
+		buttons &= ~IN_JUMP;
 	}
 
 	// This can be bypassed by spamming +duck on CSS which causes `iGroundEntity` to be `-1` here...
@@ -4350,7 +4334,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		}
 	}
 #endif
-
 
 	gA_Timers[client].bJumped = false;
 	gA_Timers[client].bOnGround = bOnGround;
@@ -4627,7 +4610,7 @@ public int MenuHandler_MessageSetting(Menu menu, MenuAction action, int param1, 
 		menu.GetItem(param2, sInfo, 16, style, sDisplay, 64);
 		int iSelection = StringToInt(sInfo);
 
-		Format(sDisplay, 64, "[%T] %s", ((gI_MessageSettings[param1] & iSelection) == 0) ? "ItemEnabled":"ItemDisabled", param1, sDisplay);
+		Format(sDisplay, 64, "[%s] %s", ((gI_MessageSettings[param1] & iSelection) == 0) ? "＋":"－", sDisplay);
 
 		return RedrawMenuItem(sDisplay);
 	}

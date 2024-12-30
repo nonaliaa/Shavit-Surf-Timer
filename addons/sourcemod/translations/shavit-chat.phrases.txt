@@ -84,8 +84,4 @@
 	{
 		"en"		"The quick brown fox jumps over the lazy dog"
 	}
-	"TitleEquipped"
-	{
-		"en"		"Equipped"
-	}
 }

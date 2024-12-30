@@ -79,12 +79,6 @@ enum struct zone_settings_t
 	char sBeam[PLATFORM_MAX_PATH];
 }
 
-enum struct stagemenu_info_t
-{
-	int iStage;	
-	char sInfo[8];
-}
-
 // 0 - nothing
 // 1 - wait for E tap to setup first coord
 // 2 - wait for E tap to setup second coord
@@ -1839,7 +1833,7 @@ public void SQL_RefreshZones_Callback(Database db, DBResultSet results, const ch
 		cache.iDatabaseID = results.FetchInt(11);
 		cache.iFlags = results.FetchInt(12);
 		cache.iData = results.FetchInt(13);
-		cache.bUseSpeedLimit = view_as<bool>(results.FetchInt(14));
+		cache.bUseSpeedLimit = view_as<bool>(results.FetchFloat(14));
 		cache.iForm = results.FetchInt(15);
 		results.FetchString(16, cache.sTarget, sizeof(cache.sTarget));
 		cache.sSource = "sql";
@@ -2719,12 +2713,7 @@ public Action Command_Stages(int client, int args)
 				}
 				else
 				{
-					float fCenter[3];
-					fCenter[0] = gV_ZoneCenter[iIndex][0];
-					fCenter[1] = gV_ZoneCenter[iIndex][1];
-					fCenter[2] = gA_ZoneCache[iIndex].fCorner1[2] + gCV_ExtraSpawnHeight.FloatValue + 1.0;
-
-					TeleportEntity(client, fCenter, NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
+					TeleportEntity(client, gV_ZoneCenter[iIndex], NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
 					return Plugin_Handled;	
 				}
 			}
@@ -2736,38 +2725,28 @@ public Action Command_Stages(int client, int args)
 		menu.SetTitle("%T", "ZoneMenuStage", client);
 
 		char sDisplay[64];
-		ArrayList aStageInfo = new ArrayList(sizeof(stagemenu_info_t));
-		stagemenu_info_t info;
 
 		for(int i = 0; i < gI_MapZones; i++)
 		{
 			if (gA_ZoneCache[i].iType == Zone_Stage)
 			{
-				IntToString(i, info.sInfo, 8);
-				info.iStage = gA_ZoneCache[i].iData;
+				FormatEx(sDisplay, 64, "#%d - %T", (i + 1), "ZoneSetStage", client, gA_ZoneCache[i].iData);
 
-				aStageInfo.PushArray(info);
+				char sInfo[8];
+				IntToString(i, sInfo, 8);
+
+				menu.AddItem(sInfo, sDisplay);
 			}
 			else if (gA_ZoneCache[i].iType == Zone_Start && gA_ZoneCache[i].iTrack == Track_Main)
 			{
-				IntToString(i, info.sInfo, 8);
-				info.iStage = 1;
+				FormatEx(sDisplay, 64, "#%d - %T", (i + 1), "ZoneSetStage", client, 1);
 
-				aStageInfo.PushArray(info);
+				char sInfo[8];
+				IntToString(i, sInfo, 8);
+
+				menu.AddItem(sInfo, sDisplay);
 			}
 		}
-
-		aStageInfo.Sort(Sort_Ascending, Sort_Integer);
-
-		for (int i = 0; i < aStageInfo.Length; i++)
-		{
-			aStageInfo.GetArray(i, info);
-			FormatEx(sDisplay, 64, "%T %d", "StageText", client, info.iStage);
-
-			menu.AddItem(info.sInfo, sDisplay);
-		}
-
-		delete aStageInfo;
 
 		menu.ExitButton = true;
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -2797,12 +2776,7 @@ public int MenuHandler_SelectStage(Menu menu, MenuAction action, int param1, int
 		}
 		else
 		{
-			float fCenter[3];
-			fCenter[0] = gV_ZoneCenter[iIndex][0];
-			fCenter[1] = gV_ZoneCenter[iIndex][1];
-			fCenter[2] = gA_ZoneCache[iIndex].fCorner1[2] + gCV_ExtraSpawnHeight.FloatValue + 1.0;
-			
-			TeleportEntity(param1, fCenter, NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
+			TeleportEntity(param1, gV_ZoneCenter[iIndex], NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
 		}
 	}
 	else if(action == MenuAction_End)
@@ -3191,7 +3165,7 @@ void OpenHookMenu_Editor(int client)
 
 	if(form == ZoneForm_trigger_multiple || form == ZoneForm_Box)
 	{
-		FormatEx(display, sizeof(display), "[%T] %T\n ", form == ZoneForm_Box ? "ItemEnabled":"ItemDisabled", client, "ZoneHook_Asboxform", client);
+		FormatEx(display, sizeof(display), "%T\n ", "ZoneHook_Asboxform", client, form == ZoneForm_Box ? "＋":"－");
 		menu.AddItem("asbox", display);
 	}
 
@@ -4722,7 +4696,7 @@ void UpdateTeleportZone(int client)
 		int iZoneStage;
 		bool InsideStage = Shavit_InsideZoneStage(client, Track_Main, iZoneStage);
 
-		if(InsideStage && iZoneStage != gA_EditCache[client].iData)
+		if(InsideStage && iZoneStage != Shavit_GetClientLastStage(client))
 		{
 			Shavit_PrintToChat(client, "%T", "ZoneTeleportInsideOtherStageZone", client);
 		}
@@ -4799,7 +4773,7 @@ void CreateEditMenu(int client, bool autostage=false)
 		}
 		else
 		{
-			FormatEx(sMenuItem, 64, "%T", "ZoneSetConfirm", client);
+			FormatEx(sMenuItem, 64, "%T", "ZoneSetComfirm", client);
 			menu.AddItem("yes", sMenuItem);
 		}
 
@@ -4808,7 +4782,7 @@ void CreateEditMenu(int client, bool autostage=false)
 	}
 	else if (gA_EditCache[client].iType == Zone_Stage)
 	{
-		FormatEx(sMenuItem, 64, "%T", "ZoneSetConfirm", client);
+		FormatEx(sMenuItem, 64, "%T", "ZoneSetComfirm", client);
 		menu.AddItem("yes", sMenuItem);
 
 		FormatEx(sMenuItem, 64, "%T", "ZoneSetTPZone", client);
@@ -4816,7 +4790,7 @@ void CreateEditMenu(int client, bool autostage=false)
 	}
 	else
 	{
-		FormatEx(sMenuItem, 64, "%T", "ZoneSetConfirm", client);
+		FormatEx(sMenuItem, 64, "%T", "ZoneSetComfirm", client);
 		menu.AddItem("yes", sMenuItem);
 	}
 
@@ -4829,18 +4803,18 @@ void CreateEditMenu(int client, bool autostage=false)
 		menu.AddItem("adjust", sMenuItem, ITEMDRAW_DEFAULT);		
 	}
 
-	FormatEx(sMenuItem, 64, "[%T] %T", ((gA_EditCache[client].iFlags & ZF_ForceRender) > 0)? "ItemEnabled":"ItemDisabled", client, "ZoneForceRender", client);
+	FormatEx(sMenuItem, 64, "%T", "ZoneForceRender", client, ((gA_EditCache[client].iFlags & ZF_ForceRender) > 0)? "＋":"－");
 	menu.AddItem("forcerender", sMenuItem);
 
 	if(gA_EditCache[client].iForm == ZoneForm_trigger_multiple)
 	{
-		FormatEx(sMenuItem, 64, "[%T] %T", ((gA_EditCache[client].iFlags & ZF_DrawAsBox) > 0)? "ItemEnabled":"ItemDisabled", client, "ZoneDrawAsBox", client);
+		FormatEx(sMenuItem, 64, "%T", "ZoneDrawAsBox", client, ((gA_EditCache[client].iFlags & ZF_DrawAsBox) > 0)? "＋":"－");
 		menu.AddItem("drawasbox", sMenuItem);
 	}
 
 	if (gA_EditCache[client].iType == Zone_Stage)
 	{
-		FormatEx(sMenuItem, 64, "[%T] %T", gA_EditCache[client].bUseSpeedLimit ? "ItemEnabled":"ItemDisabled", client, "ZoneUseStageSpeedLimit", client);
+		FormatEx(sMenuItem, 64, "%T", "ZoneUseStageSpeedLimit", client, gA_EditCache[client].bUseSpeedLimit ? "＋":"－");
 		menu.AddItem("togglespdlimit", sMenuItem);
 
 		if (autostage)
@@ -5703,8 +5677,9 @@ public void TeleportToStartZone(int client, int track, int stage)
 			float fCenter[3];
 			fCenter[0] = gV_ZoneCenter[iIndex][0];
 			fCenter[1] = gV_ZoneCenter[iIndex][1];
-			fCenter[2] = gA_ZoneCache[iIndex].fCorner1[2] + gCV_ExtraSpawnHeight.FloatValue + 1.0;
+			fCenter[2] = gA_ZoneCache[iIndex].fCorner1[2] + gCV_ExtraSpawnHeight.FloatValue;
 
+			fCenter[2] += 1.0;
 			TeleportEntity(client, fCenter, NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));			
 		}
 	}
@@ -5720,12 +5695,7 @@ public void TeleportToStartZone(int client, int track, int stage)
 			}
 			else
 			{
-				float fCenter[3];
-				fCenter[0] = gV_ZoneCenter[iIndex][0];
-				fCenter[1] = gV_ZoneCenter[iIndex][1];
-				fCenter[2] = gA_ZoneCache[iIndex].fCorner1[2] + gCV_ExtraSpawnHeight.FloatValue + 1.0;
-
-				TeleportEntity(client, fCenter, NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
+				TeleportEntity(client, gV_ZoneCenter[iIndex], NULL_VECTOR, view_as<float>({0.0, 0.0, 0.0}));
 			}
 		}
 	}

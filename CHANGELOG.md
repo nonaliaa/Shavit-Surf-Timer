@@ -1,26 +1,6 @@
 CHANGELOG.md file for bhoptimer -- https://github.com/shavitush/bhoptimer
 Note: Dates are UTC+0.
 
-# Shavit SurfTimer - Change log - 2024-11-20 -
-* Update [`v1.0.4...v1.0.4 Bugfix`]
-
-# Shavit SurfTimer update [v1.0.4...v1.0.4 Bugfix]
-
-## Release note: 
-> I'm sorry for publish a bugfix release and found this bug at this late, 
-Please understand that I am the only one working on this plugin and no one test this plugin for me. 
-And if there are any server using my plugins (appreciate it), please use this bugfix version  **ASAP** 
-
-## New feature
-* Allow players to use checkpoints when timer paused
-* Insert new wr's checkpoint times after old wr is deleted
-
-## Bug fixes
-* Fix checkpoint times database insert error caused by SQL .
-* Fix bug that cause bot angle flick on replay start.
-
-
-
 # Shavit SurfTimer - Change log - 2024-11-9 -
 * Update [`v1.0.3...v1.0.4`]
 
